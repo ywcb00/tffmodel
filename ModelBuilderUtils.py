@@ -1,6 +1,6 @@
-from dataset.DatasetUtils import DatasetID
-from model.FloodNetModelBuilder import FloodNetModelBuilder
-from model.MnistModelBuilder import MnistModelBuilder
+from tffdataset.DatasetUtils import DatasetID
+from tffmodel.FloodNetModelBuilder import FloodNetModelBuilder
+from tffmodel.MnistModelBuilder import MnistModelBuilder
 
 def getModelBuilder(config):
     match config["dataset_id"]:

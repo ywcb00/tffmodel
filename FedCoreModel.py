@@ -1,7 +1,7 @@
-from model.IModel import IModel
-from model.KerasModel import KerasModel
-from model.ModelBuilderUtils import getLoss, getMetrics, getFedCoreOptimizers, getOptimizer
-from utils.Utils import Utils
+from tffmodel.IModel import IModel
+from tffmodel.KerasModel import KerasModel
+from tffmodel.ModelBuilderUtils import getLoss, getMetrics, getFedCoreOptimizers, getOptimizer
+from tffmodel.ModelUtils import ModelUtils
 
 import attrs
 import logging
@@ -139,7 +139,7 @@ class FedCoreModel(IModel):
             # TODO: evaluate decentralized on train data and log the result for tensorboard
             if(self.config["log_level"] <= logging.DEBUG):
                 train_eval[f'{round_idx}'] = self.evaluateDecentralized(fed_dataset.train)
-        self.logger.debug(Utils.printEvaluations(train_eval, self.config, first_col_name="Round"))
+        self.logger.debug(ModelUtils.printEvaluations(train_eval, self.config, first_col_name="Round"))
 
     @classmethod
     def getTrainedKerasModel(self_class, data, state, config):

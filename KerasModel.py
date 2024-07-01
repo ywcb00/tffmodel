@@ -1,5 +1,5 @@
-from model.IModel import IModel
-from model.ModelBuilderUtils import getModelBuilder, getLoss, getMetrics, getOptimizer
+from tffmodel.IModel import IModel
+from tffmodel.ModelBuilderUtils import getModelBuilder, getLoss, getMetrics, getOptimizer
 
 import logging
 import tensorflow as tf

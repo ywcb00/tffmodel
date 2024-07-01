@@ -1,4 +1,4 @@
-from model.IModelBuilder import IModelBuilder
+from tffmodel.IModelBuilder import IModelBuilder
 
 import tensorflow as tf
 import tensorflow_federated as tff

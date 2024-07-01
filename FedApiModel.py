@@ -1,7 +1,7 @@
-from model.IModel import IModel
-from model.KerasModel import KerasModel
-from model.ModelBuilderUtils import getLoss, getMetrics, getFedApiOptimizers
-from utils.Utils import Utils
+from tffmodel.IModel import IModel
+from tffmodel.KerasModel import KerasModel
+from tffmodel.ModelBuilderUtils import getLoss, getMetrics, getFedApiOptimizers
+from tffmodel.ModelUtils import ModelUtils
 
 import logging
 import tensorflow as tf
@@ -58,7 +58,7 @@ class FedApiModel(IModel):
             if(self.config["log_level"] <= logging.DEBUG):
                 train_eval[n_round] = training_metrics
 
-        self.logger.debug(Utils.printEvaluations(train_eval, self.config, first_col_name="Round"))
+        self.logger.debug(ModelUtils.printEvaluations(train_eval, self.config, first_col_name="Round"))
 
         self.state = (training_process, training_result)
 
