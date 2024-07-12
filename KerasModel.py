@@ -12,17 +12,31 @@ class KerasModel(IModel):
 
     @classmethod
     def createKerasModel(self_class, data, config):
+        return self_class.createKerasModelElementSpec(data.element_spec, config)
+
+    @classmethod
+    def createKerasModelElementSpec(self_class, data_element_spec, config):
         model_builder = getModelBuilder(config)
-        keras_model = model_builder.buildModel(data)
+        keras_model = model_builder.buildModelElementSpec(data_element_spec)
         return keras_model
+
+    def setWeights(self, weights):
+        # assign the weights to the keras model
+        self.model.set_weights(weights)
+
+    def getWeights(self):
+        return self.model.get_weights()
+
+    def initModel(self, data):
+        self.model = self.createKerasModel(data, self.config)
+        self.model.compile(optimizer=getOptimizer(self.config),
+            loss=getLoss(self.config),
+            metrics=getMetrics(self.config))
 
     def fit(self, dataset):
         self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances')
 
-        self.model = self.createKerasModel(dataset.train, self.config)
-        self.model.compile(optimizer=getOptimizer(self.config),
-            loss=getLoss(self.config),
-            metrics=getMetrics(self.config))
+        self.initModel(dataset.train)
 
         # set logging for tensorboard visualization
         logdir = self.config["log_dir"] # delete any previous results

@@ -10,15 +10,6 @@ class MnistModelBuilder(IModelBuilder):
         self.server_learning_rate = 1.
         self.client_learning_rate = 0.02
 
-    def buildModel(self, data):
-        # construct a sequential model
-        model = tf.keras.Sequential()
-
-        model.add(tf.keras.Input(shape=data.element_spec[0].shape[1:]))
-        self.buildKerasModelLayers(model)
-
-        return model
-
     def buildKerasModelLayers(self, keras_model):
         num_classes = 10
 

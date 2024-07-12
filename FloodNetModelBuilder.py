@@ -11,21 +11,6 @@ class FloodNetModelBuilder(IModelBuilder):
         self.client_learning_rate = 0.00005
         self.model_abbrv = "c96_c32_dr25"
 
-    def buildModel(self, data):
-        # load the pre-defined ResNet50 model with 2 output classes and not pre-trained
-        # model = tf.keras.applications.resnet50.ResNet50(
-        #     include_top = True,
-        #     weights = None,
-        #     input_shape = data.element_spec[0].shape[1:],
-        #     classes = 1)
-
-        # construct a sequential model
-        model = tf.keras.Sequential()
-        model.add(tf.keras.Input(shape=data.element_spec[0].shape[1:]))
-        self.buildKerasModelLayers(model)
-
-        return model
-
     def buildKerasModelLayers(self, keras_model):
         # NOTE: set the initializers in order to ensure reproducibility
         match self.model_abbrv:

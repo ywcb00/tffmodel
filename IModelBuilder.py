@@ -1,11 +1,22 @@
 from abc import ABC, abstractmethod
+import tensorflow as tf
 
 class IModelBuilder(ABC):
     def __init__(self, config):
         self.config = config
 
+    def buildModel(self, data):
+        return self.buildModelElementSpec(data.element_spec)
+
+    def buildModelElementSpec(self, data_element_spec):
+        # construct a sequential model
+        model = tf.keras.Sequential()
+        model.add(tf.keras.Input(shape=data_element_spec[0].shape[1:]))
+        self.buildKerasModelLayers(model)
+        return model
+
     @abstractmethod
-    def buildModel(self):
+    def buildKerasModelLayers(self, keras_model):
         pass
 
     @abstractmethod
