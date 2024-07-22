@@ -36,8 +36,6 @@ class KerasModel(IModel):
     def fit(self, dataset):
         self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances')
 
-        self.initModel(dataset.train)
-
         # set logging for tensorboard visualization
         logdir = self.config["log_dir"] # delete any previous results
         try:
