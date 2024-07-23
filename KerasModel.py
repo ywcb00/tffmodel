@@ -28,13 +28,14 @@ class KerasModel(IModel):
         return self.model.get_weights()
 
     def initModel(self, data):
+        self.initModelWithOptimizer(data,
+            optimizer=getOptimizer(self.config))
+
+    def initModelWithOptimizer(self, data, optimizer):
         self.model = self.createKerasModel(data, self.config)
-        self.model.compile(optimizer=getOptimizer(self.config),
+        self.model.compile(optimizer=optimizer,
             loss=getLoss(self.config),
             metrics=getMetrics(self.config))
-
-    def fit(self, dataset):
-        self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances')
 
         # set logging for tensorboard visualization
         logdir = self.config["log_dir"] # delete any previous results
@@ -42,7 +43,10 @@ class KerasModel(IModel):
             tf.io.gfile.rmtree(logdir)
         except tf.errors.NotFoundError as e:
             pass # ignore if no previous results to delete
-        logging_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+        self.logging_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+
+    def fit(self, dataset):
+        self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances')
 
         self.fit_history = self.model.fit(x=dataset.train,
             y=None, # already in the dataset
@@ -51,7 +55,7 @@ class KerasModel(IModel):
             validation_data=None, # we have a separate validation split
             shuffle=False,
             verbose=2,
-            callbacks=[logging_callback])
+            callbacks=[self.logging_callback])
 
     def predict(self, data):
         return self.predictKerasModel(self.model, data)
