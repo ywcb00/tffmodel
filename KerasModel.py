@@ -20,6 +20,13 @@ class KerasModel(IModel):
         keras_model = model_builder.buildModelElementSpec(data_element_spec)
         return keras_model
 
+    @classmethod
+    def fromExistingModel(self_class, model, optimizer, config):
+        keras_model = KerasModel(config)
+        keras_model.model = model
+        keras_model.initOptimizer(optimizer)
+        return keras_model
+
     def setWeights(self, weights):
         # assign the weights to the keras model
         self.model.set_weights(weights)
@@ -33,6 +40,9 @@ class KerasModel(IModel):
 
     def initModelWithOptimizer(self, data, optimizer):
         self.model = self.createKerasModel(data, self.config)
+        self.initOptimizer(optimizer)
+
+    def initOptimizer(self, optimizer):
         self.model.compile(optimizer=optimizer,
             loss=getLoss(self.config),
             metrics=getMetrics(self.config))
