@@ -27,6 +27,15 @@ class KerasModel(IModel):
         keras_model.initOptimizer(optimizer)
         return keras_model
 
+    def clone(self):
+        cloned_model = tf.keras.models.clone_model(self.model)
+        duplicated_keras_model = KerasModel.fromExistingModel(
+            cloned_model, self.model.optimizer, self.config)
+        return duplicated_keras_model
+
+    def getModel(self):
+        return self.model
+
     def setWeights(self, weights):
         # assign the weights to the keras model
         self.model.set_weights(weights)
