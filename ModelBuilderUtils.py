@@ -8,6 +8,8 @@ def getModelBuilder(config):
             return FloodNetModelBuilder(config)
         case DatasetID.Mnist:
             return MnistModelBuilder(config)
+        case _:
+            raise NotImplementedError
 
 def getLoss(config):
     return getModelBuilder(config).getLoss()
