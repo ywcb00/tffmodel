@@ -1,5 +1,6 @@
 from tffmodel.IModel import IModel
 from tffmodel.ModelBuilderUtils import getModelBuilder, getLoss, getMetrics, getOptimizer
+from tffmodel.Weights import Weights
 
 import logging
 import tensorflow as tf
@@ -38,10 +39,10 @@ class KerasModel(IModel):
 
     def setWeights(self, weights):
         # assign the weights to the keras model
-        self.model.set_weights(weights)
+        self.model.set_weights(weights._weights)
 
     def getWeights(self):
-        return self.model.get_weights()
+        return Weights(self.model.get_weights())
 
     def initModel(self, data):
         self.initModelWithOptimizer(data,
