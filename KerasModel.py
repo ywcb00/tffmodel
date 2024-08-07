@@ -1,8 +1,10 @@
+from tffmodel.Gradient import Gradient
 from tffmodel.IModel import IModel
 from tffmodel.ModelBuilderUtils import getModelBuilder, getLoss, getMetrics, getOptimizer
 from tffmodel.Weights import Weights
 
 import logging
+import numpy as np
 import tensorflow as tf
 
 class KerasModel(IModel):
@@ -39,7 +41,7 @@ class KerasModel(IModel):
 
     def setWeights(self, weights):
         # assign the weights to the keras model
-        self.model.set_weights(weights._weights)
+        self.model.set_weights(weights.get())
 
     def getWeights(self):
         return Weights(self.model.get_weights())
@@ -66,7 +68,7 @@ class KerasModel(IModel):
         self.logging_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
     def fit(self, dataset):
-        self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances')
+        self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances.')
 
         self.fit_history = self.model.fit(x=dataset.train,
             y=None, # already in the dataset
@@ -76,6 +78,40 @@ class KerasModel(IModel):
             shuffle=False,
             verbose=2,
             callbacks=[self.logging_callback])
+
+    # def fitGradients(self, dataset):
+    #     self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances ' +
+    #         'using explicit gradients.')
+
+    #     for epoch in range(self.config["num_train_rounds"]):
+    #         for step, (x_batch_train, y_batch_train) in enumerate(dataset.train):
+    #             with tf.GradientTape() as tape:
+    #                 preds = self.model(x_batch_train, training=True)
+    #                 loss_value = getLoss(self.config)(y_batch_train, preds)
+    #             grads = tape.gradient(loss_value, self.model.trainable_variables)
+    #             self.model.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
+    #             if(step == 0):
+    #                 accumulated_grads = np.array(grads, dtype=object)
+    #             else:
+    #                 accumulated_grads += np.array(grads, dtype=object)
+
+    #     return accumulated_grads
+
+    # compute the accumulated gradient, no training
+    def computeGradient(self, dataset):
+        for epoch in range(self.config["num_train_rounds"]):
+            for step, (x_batch_train, y_batch_train) in enumerate(dataset.train):
+                with tf.GradientTape() as tape:
+                    preds = self.model(x_batch_train, training=True)
+                    loss_value = getLoss(self.config)(y_batch_train, preds)
+                grad = tape.gradient(loss_value, self.model.trainable_variables)
+                grad = Gradient([g.numpy() for g in grad])
+                if(step == 0):
+                    accumulated_grad = grad
+                else:
+                    accumulated_grad += grad
+
+        return accumulated_grad
 
     def predict(self, data):
         return self.predictKerasModel(self.model, data)

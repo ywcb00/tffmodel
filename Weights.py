@@ -4,8 +4,17 @@ class Weights():
     def __init__(self, layer_weights):
         self._weights = np.array(layer_weights, dtype=object)
 
+    @classmethod
+    def getZero(self_class, shape_layer_weights):
+        layer_weights = [np.zeros(slw.shape) for slw in shape_layer_weights]
+        return self_class(layer_weights)
+
+    def get(self):
+        return self._weights
+
     def __repr__(self):
-        return f'{self.__class__.__name__}(#layers={len(self._weights)}, shape={[lw.shape for lw in self._weights]})'
+        return (f'{self.__class__.__name__}(#layers={len(self._weights)}, '
+            f'shape={[lw.shape for lw in self._weights]}, dtype={[lw.dtype for lw in self._weights]})')
 
     def add_primitive(self, other):
         if(isinstance(other, self.__class__)):
