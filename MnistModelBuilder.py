@@ -6,9 +6,9 @@ import tensorflow_federated as tff
 class MnistModelBuilder(IModelBuilder):
     def __init__(self, config):
         super().__init__(config)
-        self.learning_rate = 0.001
-        self.server_learning_rate = 1.
-        self.client_learning_rate = 0.02
+        self.learning_rate = float(config.setdefault("lr", 0.001))
+        self.server_learning_rate = float(config.setdefault("lr_server", 1.))
+        self.client_learning_rate = float(config.setdefault("lr_client", 0.02))
 
     def buildKerasModelLayers(self, keras_model):
         num_classes = 10
@@ -35,14 +35,8 @@ class MnistModelBuilder(IModelBuilder):
         return [tf.metrics.CategoricalCrossentropy(),
             tf.metrics.CategoricalAccuracy()]
 
-    def getLearningRate(self):
-        return self.learning_rate
-
     def getOptimizer(self):
         return tf.keras.optimizers.SGD(learning_rate=self.getLearningRate())
-
-    def getFedLearningRates(self):
-        return self.server_learning_rate, self.client_learning_rate
 
     def getFedApiOptimizers(self):
         server_lr, client_lr = self.getFedLearningRates()

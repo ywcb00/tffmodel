@@ -27,17 +27,15 @@ class IModelBuilder(ABC):
     def getMetrics(self):
         pass
 
-    @abstractmethod
     def getLearningRate(self):
-        pass
+        return self.learning_rate
 
     @abstractmethod
     def getOptimizer(self):
         pass
 
-    @abstractmethod
     def getFedLearningRates(self):
-        pass
+        return self.server_learning_rate, self.client_learning_rate
 
     @abstractmethod
     def getFedApiOptimizers(self):

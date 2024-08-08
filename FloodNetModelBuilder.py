@@ -6,9 +6,9 @@ import tensorflow_federated as tff
 class FloodNetModelBuilder(IModelBuilder):
     def __init__(self, config):
         super().__init__(config)
-        self.learning_rate = 0.00005
-        self.server_learning_rate = 0.2
-        self.client_learning_rate = 0.00005
+        self.learning_rate = float(config.setdefault("lr", 0.00005))
+        self.server_learning_rate = float(config.setdefault("lr_server", 0.2))
+        self.client_learning_rate = float(config.setdefault("lr_client", 0.00005))
         self.model_abbrv = "c96_c32_dr25"
 
     def buildKerasModelLayers(self, keras_model):
@@ -282,14 +282,8 @@ class FloodNetModelBuilder(IModelBuilder):
         return [tf.keras.metrics.BinaryCrossentropy(),
             tf.keras.metrics.BinaryAccuracy()]
 
-    def getLearningRate(self):
-        return self.learning_rate
-
     def getOptimizer(self):
         return tf.keras.optimizers.SGD(learning_rate=self.getLearningRate())
-
-    def getFedLearningRates(self):
-        return self.server_learning_rate, self.client_learning_rate
 
     def getFedApiOptimizers(self):
         server_lr, client_lr = self.getFedLearningRates()
