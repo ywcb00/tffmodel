@@ -33,14 +33,15 @@ class FedApiModel(IModel):
             server_optimizer_fn=lambda: getFedApiOptimizers(self.config)[0],
             client_optimizer_fn=lambda: getFedApiOptimizers(self.config)[1])
 
-        # set logging for tensorboard visualization
-        logdir = self.config["log_dir"] # delete any previous results
-        try:
-            tf.io.gfile.rmtree(logdir)
-        except tf.errors.NotFoundError as e:
-            pass # ignore if no previous results to delete
-        log_summary_writer = tf.summary.create_file_writer(logdir)
-        log_summary_writer.set_as_default()
+        if(self.config.setdefault('tensorboard_logging', True)):
+            # set logging for tensorboard visualization
+            logdir = f'{self.config["log_dir"]}/tensorboard' # delete any previous results
+            try:
+                tf.io.gfile.rmtree(logdir)
+            except tf.errors.NotFoundError as e:
+                pass # ignore if no previous results to delete
+            log_summary_writer = tf.summary.create_file_writer(logdir)
+            log_summary_writer.set_as_default()
 
         training_state = training_process.initialize()
 
@@ -50,9 +51,10 @@ class FedApiModel(IModel):
             training_state = training_result.state
             training_metrics = training_result.metrics['client_work']['train']
 
-            # tensorboard logging
-            for name, value in training_metrics.items():
-                tf.summary.scalar(name, value, step=n_round)
+            if(self.config.setdefault('tensorboard_logging', True)):
+                # tensorboard logging
+                for name, value in training_metrics.items():
+                    tf.summary.scalar(name, value, step=n_round)
 
             # logging in console output
             if(self.config["log_level"] <= logging.DEBUG):

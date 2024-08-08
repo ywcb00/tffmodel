@@ -59,13 +59,15 @@ class KerasModel(IModel):
             loss=getLoss(self.config),
             metrics=getMetrics(self.config))
 
-        # set logging for tensorboard visualization
-        logdir = self.config["log_dir"] # delete any previous results
-        try:
-            tf.io.gfile.rmtree(logdir)
-        except tf.errors.NotFoundError as e:
-            pass # ignore if no previous results to delete
-        self.logging_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+        if(self.config.setdefault('tensorboard_logging', True)):
+            # set logging for tensorboard visualization
+            logdir = f'{self.config["log_dir"]}/tensorboard' # delete any previous results
+            try:
+                tf.io.gfile.rmtree(logdir)
+            except tf.errors.NotFoundError as e:
+                pass # ignore if no previous results to delete
+            self.logging_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+            print(f'Log directory used for tensorboard: {logdir}')
 
     def fit(self, dataset):
         self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances.')
@@ -77,7 +79,7 @@ class KerasModel(IModel):
             validation_data=None, # we have a separate validation split
             shuffle=False,
             verbose=2,
-            callbacks=[self.logging_callback])
+            callbacks=None if not self.config.setdefault('tensorboard_logging', True) else [self.logging_callback])
 
     # def fitGradients(self, dataset):
     #     self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances ' +
