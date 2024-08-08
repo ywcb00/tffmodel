@@ -72,7 +72,7 @@ class KerasModel(IModel):
     def fit(self, dataset):
         self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances.')
 
-        self.fit_history = self.model.fit(x=dataset.train,
+        fit_history = self.model.fit(x=dataset.train,
             y=None, # already in the dataset
             batch_size=None, # already in the dataset
             epochs=self.config["num_train_rounds"],
@@ -80,6 +80,8 @@ class KerasModel(IModel):
             shuffle=False,
             verbose=2,
             callbacks=None if not self.config.setdefault('tensorboard_logging', True) else [self.logging_callback])
+
+        return fit_history
 
     # def fitGradients(self, dataset):
     #     self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances ' +
