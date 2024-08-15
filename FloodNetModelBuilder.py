@@ -282,16 +282,26 @@ class FloodNetModelBuilder(IModelBuilder):
         return [tf.keras.metrics.BinaryCrossentropy(),
             tf.keras.metrics.BinaryAccuracy()]
 
+    def getLearningRateSchedule(self):
+        lr = self.getLearningRate()
+        return lr
+
     def getOptimizer(self):
-        return tf.keras.optimizers.SGD(learning_rate=self.getLearningRate())
+        return tf.keras.optimizers.SGD(
+            learning_rate=self.getLearningRateSchedule())
+
+    def getFedLearningRateSchedules(self):
+        server_lr, client_lr = self.getFedLearningRates()
+        return server_lr, client_lr
 
     def getFedApiOptimizers(self):
-        server_lr, client_lr = self.getFedLearningRates()
-        server_optimizer = tf.keras.optimizers.SGD(learning_rate=server_lr)
-        client_optimizer = tf.keras.optimizers.SGD(learning_rate=client_lr)
+        server_lr_sched, client_lr_sched = self.getFedLearningRateSchedules()
+        server_optimizer = tf.keras.optimizers.SGD(learning_rate=server_lr_sched)
+        client_optimizer = tf.keras.optimizers.SGD(learning_rate=client_lr_sched)
         return server_optimizer, client_optimizer
 
     def getFedCoreOptimizers(self):
+        # NOTE: only float learning rates in tff, no schedules
         server_lr, client_lr = self.getFedLearningRates()
         server_optimizer = tff.learning.optimizers.build_sgdm(learning_rate=server_lr)
         client_optimizer = tff.learning.optimizers.build_sgdm(learning_rate=client_lr)

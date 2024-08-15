@@ -3,6 +3,7 @@ from tffmodel.FloodNetModelBuilder import FloodNetModelBuilder
 from tffmodel.MnistModelBuilder import MnistModelBuilder
 
 def getModelBuilder(config):
+    # TODO: this implementation creates a model builder object for every call
     match config["dataset_id"]:
         case DatasetID.FloodNet:
             return FloodNetModelBuilder(config)
@@ -20,11 +21,17 @@ def getMetrics(config):
 def getLearningRate(config):
     return getModelBuilder(config).getLearningRate()
 
+def getLearningRateSchedule(config):
+    return getModelBuilder(config).getLearningRateSchedule()
+
 def getOptimizer(config):
     return getModelBuilder(config).getOptimizer()
 
 def getFedLearningRates(config):
     return getModelBuilder(config).getFedLearningRates()
+
+def getFedLearningRateSchedules(config):
+    return getModelBuilder(config).getFedLearningRateSchedules()
 
 def getFedApiOptimizers(config):
     return getModelBuilder(config).getFedApiOptimizers()

@@ -35,16 +35,30 @@ class MnistModelBuilder(IModelBuilder):
         return [tf.metrics.CategoricalCrossentropy(),
             tf.metrics.CategoricalAccuracy()]
 
+    def getLearningRateSchedule(self):
+        lr = self.getLearningRate()
+        return lr
+
     def getOptimizer(self):
-        return tf.keras.optimizers.SGD(learning_rate=self.getLearningRate())
+        return tf.keras.optimizers.SGD(
+            learning_rate=self.getLearningRateSchedule())
+
+    def getFedLearningRateSchedules(self):
+        server_lr, client_lr = self.getFedLearningRates()
+        # client_lr_sched = tf.keras.optimizers.schedules.ExponentialDecay(
+        #     initial_learning_rate=client_lr,
+        #     decay_steps=10,
+        #     decay_rate=0.6)
+        return server_lr, client_lr
 
     def getFedApiOptimizers(self):
-        server_lr, client_lr = self.getFedLearningRates()
-        server_optimizer = tf.keras.optimizers.SGD(learning_rate=server_lr)
-        client_optimizer = tf.keras.optimizers.SGD(learning_rate=client_lr)
+        server_lr_sched, client_lr_sched = self.getFedLearningRateSchedules()
+        server_optimizer = tf.keras.optimizers.SGD(learning_rate=server_lr_sched)
+        client_optimizer = tf.keras.optimizers.SGD(learning_rate=client_lr_sched)
         return server_optimizer, client_optimizer
 
     def getFedCoreOptimizers(self):
+        # NOTE: only float learning rates in tff, no schedules
         server_lr, client_lr = self.getFedLearningRates()
         server_optimizer = tff.learning.optimizers.build_sgdm(learning_rate=server_lr)
         client_optimizer = tff.learning.optimizers.build_sgdm(learning_rate=client_lr)
