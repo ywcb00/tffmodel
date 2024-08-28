@@ -31,10 +31,15 @@ class KerasModel(IModel):
         return keras_model
 
     def clone(self):
+        restore_weights = self.getWeights()
         cloned_model = tf.keras.models.clone_model(self.model)
-        duplicated_keras_model = KerasModel.fromExistingModel(
-            cloned_model, self.model.optimizer, self.config)
-        return duplicated_keras_model
+        # TODO: FIXME: workaround for cloning an optimizer by serializing and deserializing
+        cloned_optimizer = tf.keras.optimizers.deserialize(
+            tf.keras.optimizers.serialize(self.model.optimizer))
+        cloned_keras_model = KerasModel.fromExistingModel(
+            cloned_model, cloned_optimizer, self.config)
+        cloned_keras_model.setWeights(restore_weights)
+        return cloned_keras_model
 
     def getModel(self):
         return self.model
