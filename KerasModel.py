@@ -69,6 +69,22 @@ class KerasModel(IModel):
             self.logging_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
             print(f'Log directory used for tensorboard: {logdir}')
 
+    def addKernelRegularizers(self, regs):
+        counter = 0
+        for layer in self.model.layers:
+            if(hasattr(layer, 'kernel_regularizer')):
+                setattr(layer, 'kernel_regularizer', regs[counter])
+                counter += 1
+        restore_weights = self.model.get_weights()
+        # TODO: FIXME: workaround for optimizer cloning through serialization and deserialization
+        cloned_optimizer = tf.keras.optimizers.deserialize(
+            tf.keras.optimizers.serialize(self.model.optimizer))
+        # TODO: FIXME: workaround: kernel regularizers are changed only in the config --> clone the model from config
+        self.model = tf.keras.models.clone_model(self.model)
+        # compile model
+        self.initOptimizer(cloned_optimizer)
+        self.model.set_weights(restore_weights)
+
     def fit(self, dataset):
         self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances.')
 
