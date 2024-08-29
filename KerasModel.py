@@ -123,7 +123,10 @@ class KerasModel(IModel):
     #     return accumulated_grads
 
     # compute the accumulated gradient, no training
+    # "The sum of the gradients is the same as the gradient obtained on the full batch"
     def computeGradient(self, dataset):
+        if(self.config["num_train_rounds"] != 1):
+            raise NotImplementedError("Multiple local epochs not supported yet.")
         for epoch in range(self.config["num_train_rounds"]):
             for step, (x_batch_train, y_batch_train) in enumerate(dataset.train):
                 with tf.GradientTape() as tape:
@@ -135,7 +138,6 @@ class KerasModel(IModel):
                     accumulated_grad = grad
                 else:
                     accumulated_grad += grad
-
         return accumulated_grad
 
     def predict(self, data):
