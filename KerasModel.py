@@ -1,7 +1,7 @@
-from tffmodel.Gradient import Gradient
+from tffmodel.types.Gradient import Gradient
 from tffmodel.IModel import IModel
 from tffmodel.ModelBuilderUtils import getModelBuilder, getLoss, getMetrics, getOptimizer
-from tffmodel.Weights import Weights
+from tffmodel.types.Weights import Weights
 
 import logging
 import numpy as np
