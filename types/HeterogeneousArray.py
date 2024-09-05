@@ -2,27 +2,31 @@ from abc import ABC, abstractclassmethod, abstractmethod
 import numpy as np
 
 class HeterogeneousArray(ABC):
-    def __init__(self, data_arrays):
+    def __init__(self, data_arrays, shapes):
+        self._shapes = shapes
         self._data = np.array(data_arrays, dtype=object)
 
     @abstractclassmethod
     def getZero(self_class, shape_layer_arrays):
         pass
 
+    @abstractmethod
     def get(self):
-        return self._data
+        pass
+
+    def getShapes(self):
+        return self._shapes
 
     def __repr__(self):
         return (f'{self.__class__.__name__}(#arrays={len(self._data)}, '
-            f'shape={[da.shape for da in self._data]}, dtype={[da.dtype for da in self._data]})')
+            f'shape={self._shapes}, dtype={[arr.dtype for arr in self._data]})')
 
     @abstractmethod
     def serialize(self):
         pass
 
-    # param shape_arrays is used to identify the respective shapes
     @abstractclassmethod
-    def deserialize(self_class, serialized_array, shape_arrays):
+    def deserialize(self_class, serialized_array):
         pass
 
     @abstractclassmethod

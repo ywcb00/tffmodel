@@ -1,34 +1,40 @@
 from tffmodel.types.HeterogeneousArray import HeterogeneousArray
 
+import math
 import numpy as np
 import scipy
 
 class HeterogeneousSparseArray(HeterogeneousArray):
-    def __init__(self, data_arrays):
+    def __init__(self, data_arrays, shapes=None):
+        if(shapes == None):
+            shapes = [np.array(layer_array.shape) for layer_array in data_arrays]
         self._data = np.array(data_arrays, dtype=object)
+        super().__init__(data_arrays, shapes)
 
     @classmethod
     def getZero(self_class, shape_layer_arrays):
-        layer_arrays = [scipy.sparse.csr_matrix(([], [[], []]), shape=sla.shape)
+        layer_arrays = [scipy.sparse.csr_array(([], [[], []]), shape=sla.size)
             for sla in shape_layer_arrays]
-        return self_class(layer_arrays)
+        shapes = [np.array(sla.shape) for sla in shape_layer_arrays]
+        return self_class(layer_arrays, shapes)
 
     def serialize(self):
         # create artificial list of with (data, indices, indptr) entries
         dii_list = []
-        for layer_array in self._data:
-            dii_list.extend([layer_array.data, layer_array.indices, layer_array.indptr])
+        for layer_array, layer_shape in zip(self._data, self._shapes):
+            dii_list.extend([layer_array.data, layer_array.indices, layer_array.indptr, layer_shape])
         serialized_array = [np.float32(arr).tobytes() for arr in dii_list]
         return serialized_array
 
     @classmethod
-    def deserialize(self_class, serialized_array, shape_arrays):
-        dii_list = [np.frombuffer(arr, dtype=np.float32) for arr in serialized_array]
-        dii_list = [(dii_list[idx], dii_list[idx+1], dii_list[idx+2])
-            for idx in range(0, len(dii_list), 3)]
-        data_arrays = [scipy.sparse.csr_matrix(dii_entry, shape=shape_arrays[idx].shape)
-            for idx, dii_entry in enumerate(dii_list)]
-        return self_class(data_arrays)
+    def deserialize(self_class, serialized_array):
+        deserialized_list = [np.frombuffer(arr, dtype=np.float32) for arr in serialized_array]
+        diis_list = [((deserialized_list[idx], deserialized_list[idx+1], deserialized_list[idx+2]),
+            deserialized_list[idx+3]) for idx in range(0, len(deserialized_list), 4)]
+        data_arrays = [scipy.sparse.csr_array(dii_entry, shape=math.prod(s_entry))
+            for dii_entry, s_entry in diis_list]
+        shapes = [s_entry for _, s_entry in diis_list]
+        return self_class(data_arrays, shapes)
 
     @classmethod
     def add_primitive(self_class, lhs, rhs):
@@ -43,7 +49,7 @@ class HeterogeneousSparseArray(HeterogeneousArray):
             and isinstance(rhs, HeterogeneousArray)): # dense array
             return rhs.add_operation(lhs, rhs)
         res = self_class.add_primitive(lhs, rhs)
-        return self_class(res)
+        return self_class(res, lhs.getShapes())
     @classmethod
     def sub_primitive(self_class, lhs, rhs):
         if(isinstance(rhs, HeterogeneousSparseArray)):
@@ -57,7 +63,7 @@ class HeterogeneousSparseArray(HeterogeneousArray):
             and isinstance(rhs, HeterogeneousArray)):
             return rhs.sub_operation(lhs, rhs)
         res = self_class.sub_primitive(lhs, rhs)
-        return self_class(res)
+        return self_class(res, lhs.getShapes())
     @classmethod
     def mul_primitive(self_class, lhs, rhs):
         if(isinstance(lhs, HeterogeneousSparseArray) and isinstance(rhs, HeterogeneousSparseArray)):
@@ -73,7 +79,7 @@ class HeterogeneousSparseArray(HeterogeneousArray):
     @classmethod
     def mul_operation(self_class, lhs, rhs):
         res = self_class.mul_primitive(lhs, rhs)
-        return self_class(res)
+        return self_class(res, lhs.getShapes())
     @classmethod
     def div_primitive(self_class, lhs, rhs):
         if(isinstance(rhs, HeterogeneousSparseArray)):
@@ -87,7 +93,7 @@ class HeterogeneousSparseArray(HeterogeneousArray):
     @classmethod
     def div_operation(self_class, lhs, rhs):
         res = self_class.div_primitive(lhs, rhs)
-        return self_class(res)
+        return self_class(res, lhs.getShapes())
     @classmethod
     def eq_primitive(self_class, lhs, rhs):
         if(isinstance(rhs, HeterogeneousSparseArray)):

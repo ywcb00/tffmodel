@@ -6,11 +6,16 @@ import scipy
 class SparseGradient(HeterogeneousSparseArray):
     @classmethod
     def sparsifyLayerwiseTopK(self_class, layer_gradients, k):
+        def resolveFlattenedIndex(idx, shape):
+            if(len(shape) == 1):
+                return [idx]
+            res_idx = (*resolveFlattenedIndex(idx//shape[-1], shape[:-1]), idx % shape[-1])
+            return res_idx
         def getTopKIndices(matrix, k):
             if(k > len(matrix.flatten())):
                 k = len(matrix.flatten())
-            sorted_idx = np.argpartition(matrix.flatten(), k)[-k:]
-            sorted_idx = list(map(lambda idx: (idx // matrix.shape[0], idx % matrix.shape[0]), sorted_idx))
+            sorted_idx = np.argpartition(matrix.flatten(), len(matrix.flatten())-k)[-k:]
+            sorted_idx = list(map(lambda idx: resolveFlattenedIndex(idx, matrix.shape), sorted_idx))
             return sorted_idx
 
         layerwise_topk_indices = [getTopKIndices(lg, k) for lg in layer_gradients]
