@@ -2,9 +2,8 @@ from abc import ABC, abstractclassmethod, abstractmethod
 import numpy as np
 
 class HeterogeneousArray(ABC):
-    def __init__(self, data_arrays, shapes):
-        self._shapes = shapes
-        self._data = np.array(data_arrays, dtype=object)
+    def __init__(self, data):
+        self._data = data
 
     @abstractclassmethod
     def getZero(self_class, shape_layer_arrays):
@@ -15,11 +14,16 @@ class HeterogeneousArray(ABC):
         pass
 
     def getShapes(self):
-        return self._shapes
+        shapes = [arr.shape for arr in self._data]
+        return shapes
+
+    def getSizes(self):
+        sizes = [arr.size for arr in self._data]
+        return sizes
 
     def __repr__(self):
         return (f'{self.__class__.__name__}(#arrays={len(self._data)}, '
-            f'shape={self._shapes}, dtype={[arr.dtype for arr in self._data]})')
+            f'shape={self.getShapes()}, dtype={[arr.dtype for arr in self._data]})')
 
     @abstractmethod
     def serialize(self):
