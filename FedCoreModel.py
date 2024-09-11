@@ -134,7 +134,7 @@ class FedCoreModel(IModel):
 
         self.state = fedavg_process.initialize()
         train_eval = dict()
-        for round_idx in range(self.config["num_train_rounds"]):
+        for round_idx in range(self.config["num_epochs"]):
             self.state = fedavg_process.next(self.state, fed_dataset.train)
             # TODO: evaluate decentralized on train data and log the result for tensorboard
             if(self.config["log_level"] <= logging.DEBUG):

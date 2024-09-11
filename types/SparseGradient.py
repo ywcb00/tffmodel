@@ -9,10 +9,11 @@ class SparsificationType(Enum):
     LAYERWISE_TOPK = 1
     LAYERWISE_PERCENTAGE = 2
 
+# returns the indices of the K elements with highest absolute value
 def getTopKIndices(arr, k):
     if(k > len(arr)):
         k = len(arr)
-    sorted_idx = np.argpartition(arr, len(arr)-k)[-k:]
+    sorted_idx = np.argpartition(np.absolute(arr), len(arr)-k)[-k:]
     return sorted_idx
 
 class SparseGradient(HeterogeneousSparseArray):
@@ -26,6 +27,7 @@ class SparseGradient(HeterogeneousSparseArray):
             case _:
                 raise NotImplementedError
 
+    # Keep only the K highest values per layer, set the others to zero
     @classmethod
     def sparsifyLayerwiseTopK(self_class, gradient, k):
         layerwise_topk_indices = [getTopKIndices(lg.flatten(), k) for lg in gradient]
@@ -38,6 +40,7 @@ class SparseGradient(HeterogeneousSparseArray):
         sparse_gradient = self_class(masked_arrays)
         return sparse_gradient
 
+    # Keep the specified percentage of highest values per layer, set the others to zero
     @classmethod
     def sparsifyLayerwisePercentage(self_class, gradient, percentage):
         layerwise_percentage_indices = [getTopKIndices(

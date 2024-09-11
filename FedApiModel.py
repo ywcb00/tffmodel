@@ -46,7 +46,7 @@ class FedApiModel(IModel):
         training_state = training_process.initialize()
 
         train_eval = dict()
-        for n_round in range(self.config["num_train_rounds"]):
+        for n_round in range(self.config["num_epochs"]):
             training_result = training_process.next(training_state, fed_dataset.train)
             training_state = training_result.state
             training_metrics = training_result.metrics['client_work']['train']
