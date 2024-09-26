@@ -5,6 +5,9 @@ class HeterogeneousArray(ABC):
     def __init__(self, data):
         self._data = data
 
+    def getLength(self):
+        return len(self._data)
+
     @abstractclassmethod
     def getZero(self_class, shape_layer_arrays):
         pass
@@ -21,8 +24,15 @@ class HeterogeneousArray(ABC):
         sizes = [arr.size for arr in self._data]
         return sizes
 
+    def take(self, indices):
+        data_arrays = [self._data[idx] for idx in indices]
+        return self.__class__(data_arrays)
+
+    def setLayer(self, layer_idx, layer_array):
+        self._data[layer_idx] = layer_array
+
     def __repr__(self):
-        return (f'{self.__class__.__name__}(#arrays={len(self._data)}, '
+        return (f'{self.__class__.__name__}(#arrays={len(self.getLength())}, '
             f'shape={self.getShapes()}, dtype={[arr.dtype for arr in self._data]})')
 
     @abstractmethod
