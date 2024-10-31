@@ -24,6 +24,18 @@ class HeterogeneousArray(ABC):
         sizes = [arr.size for arr in self._data]
         return sizes
 
+    def getSize(self):
+        size = sum(self.getSizes())
+        return size
+
+    def getDType(self):
+        dtypes = [arr.dtype for arr in self._data]
+        assert all(dtp == dtypes[0] for dtp in dtypes), "Different dtypes are not supported yet"
+        return dtypes[0]
+
+    def getDTypeName(self):
+        return self.getDType().name
+
     def take(self, indices):
         data_arrays = [self._data[idx] for idx in indices]
         return self.__class__(data_arrays)
