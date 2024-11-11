@@ -19,6 +19,19 @@ class HeterogeneousDenseArray(HeterogeneousArray):
     def get(self):
         return self._data
 
+    def getFlattened(self):
+       flattened_array = np.concatenate([da.flatten() for da in self._data], axis=0)
+       return flattened_array
+
+    @classmethod
+    def fromFlattened(self_class, flattened_array, shape_layer_arrays):
+        layer_sizes = shape_layer_arrays.getSizes()
+        indices = [0, *np.cumsum(layer_sizes)]
+        layer_arrays = [flattened_array[indices[counter]:indices[counter+1]]
+            for counter in range(len(indices)-1)]
+        layer_arrays = [layer_arr.reshape(layer_shape) for layer_arr, layer_shape in zip(layer_arrays, shape_layer_arrays.getShapes())]
+        return self_class(layer_arrays)
+
     def serialize(self):
         # NOTE: we transfer the arrays as float32 albeit it is float64
         # TODO: find a more efficient way to serialize the arrays
