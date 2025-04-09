@@ -64,7 +64,7 @@ class KerasModel(IModel):
             loss=getLoss(self.config),
             metrics=getMetrics(self.config))
 
-        if(self.config.setdefault('tensorboard_logging', True)):
+        if(self.config.setdefault('log_tensorboard_flag', True)):
             # set logging for tensorboard visualization
             logdir = f'{self.config["log_dir"]}/tensorboard' # delete any previous results
             try:
@@ -91,26 +91,27 @@ class KerasModel(IModel):
         self.model.set_weights(restore_weights)
 
     def fit(self, dataset):
-        self.logger.info(f'Fitting local model with {dataset.train.cardinality()} train instances.')
+        self.logger.info(f'Fitting local model for {self.config["num_local_epochs"]} local epochs ' +
+            f'with {dataset.train.cardinality()} train instances.')
 
         fit_history = self.model.fit(x=dataset.train,
             y=None, # already in the dataset
             batch_size=None, # already in the dataset
-            epochs=self.config["num_epochs"],
+            epochs=self.config["num_local_epochs"],
             validation_data=None, # we have a separate validation split
             shuffle=False,
             verbose=2,
-            callbacks=None if not self.config.setdefault('tensorboard_logging', True) else [self.logging_callback])
+            callbacks=None if not self.config.setdefault('log_tensorboard_flag', True) else [self.logging_callback])
 
         return fit_history
 
     def fitGradient(self, dataset):
-        self.logger.info(f'Fitting model for {self.config["num_epochs"]} epochs ' +
+        self.logger.info(f'Fitting model for {self.config["num_local_epochs"]} local epochs ' +
             f'with {dataset.train.cardinality()} train instances using explicit gradients.')
 
         train_metrics = None
 
-        for epoch in range(self.config["num_epochs"]):
+        for epoch in range(self.config["num_local_epochs"]):
             for step, (x_batch_train, y_batch_train) in enumerate(dataset.train):
                 with tf.GradientTape() as tape:
                     preds = self.model(x_batch_train, training=True)
@@ -123,7 +124,7 @@ class KerasModel(IModel):
                 else:
                     accumulated_grad += grad
 
-            if(self.config.setdefault('performance_logging', False)):
+            if(self.config.setdefault('log_performance_flag', False)):
                 scalar_train_metrics = KerasModel.evaluateKerasModel(
                     self.getModel(), dataset.train)
                 if(train_metrics == None):
@@ -136,12 +137,12 @@ class KerasModel(IModel):
 
     # compute the accumulated gradient, no training
     # "The sum of the gradients is the same as the gradient obtained on the full batch"
-    def computeGradient(self, dataset, num_epochs=None):
-        if(num_epochs == None):
-            num_epochs = self.config["num_epochs"]
-        if(num_epochs != 1):
+    def computeGradient(self, dataset, num_local_epochs=None):
+        if(num_local_epochs == None):
+            num_local_epochs = self.config["num_local_epochs"]
+        if(num_local_epochs != 1):
             raise NotImplementedError("Multiple local epochs not supported yet.")
-        for epoch in range(num_epochs):
+        for epoch in range(num_local_epochs):
             for step, (x_batch_train, y_batch_train) in enumerate(dataset.train):
                 with tf.GradientTape() as tape:
                     preds = self.model(x_batch_train, training=True)

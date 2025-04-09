@@ -21,9 +21,9 @@ class SparseGradient(HeterogeneousSparseArray):
     def sparsifyGradient(self_class, gradient, config):
         match config["sparsification_type"]:
             case SparsificationType.LAYERWISE_TOPK:
-                return self_class.sparsifyLayerwiseTopK(gradient, config["sparse_k"])
+                return self_class.sparsifyLayerwiseTopK(gradient, config["sparsification_k"])
             case SparsificationType.LAYERWISE_PERCENTAGE:
-                return self_class.sparsifyLayerwisePercentage(gradient, config["sparse_perc"])
+                return self_class.sparsifyLayerwisePercentage(gradient, config["sparsification_percentage"])
             case _:
                 raise NotImplementedError
 
