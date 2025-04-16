@@ -42,6 +42,10 @@ class HeterogeneousSparseArray(HeterogeneousArray):
             data_arrays.append(MultiDimSparseArray(coords=coords, data=data, shape=shape))
         return self_class(data_arrays)
 
+    def sparsify(self, mask):
+        masked_data = [layer * m.reshape(layer.shape) for layer, m in zip(self._data, mask)]
+        return self.__class__(masked_data)
+
     @classmethod
     def add_primitive(self_class, lhs, rhs):
         if(isinstance(rhs, HeterogeneousSparseArray)):

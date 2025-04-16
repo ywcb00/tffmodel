@@ -50,9 +50,12 @@ class HeterogeneousArray(ABC):
     @abstractmethod
     def serialize(self):
         pass
-
     @abstractclassmethod
     def deserialize(self_class, serialized_array):
+        pass
+
+    @abstractmethod
+    def sparsify(self, mask):
         pass
 
     @abstractclassmethod

@@ -1,5 +1,5 @@
 from tffmodel.types.HeterogeneousArray import HeterogeneousArray
-from tffmodel.types.MultiDimSparseArray import MultiDimSparseArray
+from tffmodel.types.HeterogeneousSparseArray import HeterogeneousSparseArray
 
 import numpy as np
 import sparse
@@ -49,6 +49,10 @@ class HeterogeneousDenseArray(HeterogeneousArray):
         data_arrays = [layer_array.reshape(layer_shape)
             for layer_array, layer_shape in data_arrays_and_shapes]
         return self_class(data_arrays)
+
+    def sparsify(self, mask):
+        masked_data = [layer * m.reshape(layer.shape) for layer, m in zip(self._data, mask)]
+        return HeterogeneousSparseArray(masked_data)
 
     @classmethod
     def add_primitive(self_class, lhs, rhs):
