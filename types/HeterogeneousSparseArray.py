@@ -22,24 +22,29 @@ class HeterogeneousSparseArray(HeterogeneousArray):
         return nnz
 
     def serialize(self):
+        # NOTE: the coordinates are serialized as 32-bit integers
         # create artificial list of with (coordinates, data, shape) entries
         serialized_array = []
         for layer_array in self._data:
+            target_dtype = layer_array.dtype
             serialized_array.extend([np.int32(layer_array.coords).flatten().tobytes(),
-                np.float32(layer_array.data).tobytes(),
-                np.int32(layer_array.shape).tobytes()])
+                layer_array.data.astype(target_dtype).tobytes(),
+                np.int32(layer_array.shape).tobytes(),
+                target_dtype.str.encode("UTF-8")])
         return serialized_array
 
     @classmethod
     def deserialize(self_class, serialized_array):
-        coords_data_and_shapes = [(np.frombuffer(serialized_array[idx], dtype=np.int32),
-                np.frombuffer(serialized_array[idx+1], dtype=np.float32),
-                np.frombuffer(serialized_array[idx+2], dtype=np.int32))
-            for idx in range(0, len(serialized_array), 3)]
         data_arrays = []
-        for coords, data, shape in coords_data_and_shapes:
-            coords = coords.reshape((len(shape), len(coords)//len(shape)))
-            data_arrays.append(MultiDimSparseArray(coords=coords, data=data, shape=shape))
+        for idx in range(0, len(serialized_array), 4):
+            layer_shape = np.frombuffer(serialized_array[idx+2], dtype=np.int32)
+            layer_coords = np.frombuffer(serialized_array[idx], dtype=np.int32)
+            layer_coords = layer_coords.reshape(
+                (len(layer_shape), len(layer_coords)//len(layer_shape)))
+            layer_dtype = np.dtype(serialized_array[idx+3].decode("UTF-8"))
+            layer_data = np.frombuffer(serialized_array[idx+1], dtype=layer_dtype)
+            data_arrays.append(MultiDimSparseArray(
+                coords=layer_coords, data=layer_data, shape=layer_shape))
         return self_class(data_arrays)
 
     def sparsify(self, mask):

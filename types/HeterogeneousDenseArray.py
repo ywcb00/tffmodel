@@ -33,21 +33,22 @@ class HeterogeneousDenseArray(HeterogeneousArray):
         return self_class(layer_arrays)
 
     def serialize(self):
-        # NOTE: we transfer the arrays as float32 albeit it is float64
         # TODO: find a more efficient way to serialize the arrays
         serialized_array = []
         for layer_array in self._data:
-            serialized_array.extend([np.float32(layer_array).tobytes(),
-                np.int32(layer_array.shape).tobytes()])
+            target_dtype = layer_array.dtype
+            serialized_array.extend([layer_array.astype(target_dtype).tobytes(),
+                np.int32(layer_array.shape).tobytes(), target_dtype.str.encode("UTF-8")])
         return serialized_array
 
     @classmethod
     def deserialize(self_class, serialized_array):
-        data_arrays_and_shapes = [(np.frombuffer(serialized_array[idx], dtype=np.float32),
-                np.frombuffer(serialized_array[idx+1], dtype=np.int32))
-            for idx in range(0, len(serialized_array), 2)]
-        data_arrays = [layer_array.reshape(layer_shape)
-            for layer_array, layer_shape in data_arrays_and_shapes]
+        data_arrays = []
+        for idx in range(0, len(serialized_array), 3):
+            layer_shape = np.frombuffer(serialized_array[idx+1], dtype=np.int32)
+            layer_dtype = np.dtype(serialized_array[idx+2].decode("UTF-8"))
+            layer_array = np.frombuffer(serialized_array[idx], dtype=layer_dtype)
+            data_arrays.append(layer_array.reshape(layer_shape))
         return self_class(data_arrays)
 
     def sparsify(self, mask):
