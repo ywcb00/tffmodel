@@ -1,7 +1,6 @@
-from tffmodel.types.Gradient import Gradient
 from tffmodel.IModel import IModel
 from tffmodel.ModelBuilderUtils import getModelBuilder, getLoss, getMetrics, getOptimizer
-from tffmodel.types.Weights import Weights
+from tffmodel.types.HeterogeneousDenseArray import HeterogeneousDenseArray
 
 import logging
 import numpy as np
@@ -49,7 +48,7 @@ class KerasModel(IModel):
         self.model.set_weights(weights.get())
 
     def getWeights(self):
-        return Weights(self.model.get_weights())
+        return HeterogeneousDenseArray(self.model.get_weights())
 
     def initModel(self, data):
         self.initModelWithOptimizer(data,
@@ -118,7 +117,7 @@ class KerasModel(IModel):
                     loss_value = getLoss(self.config)(y_batch_train, preds)
                 grad = tape.gradient(loss_value, self.model.trainable_variables)
                 self.model.optimizer.apply_gradients(zip(grad, self.model.trainable_variables))
-                grad = Gradient([g.numpy() for g in grad])
+                grad = HeterogeneousDenseArray([g.numpy() for g in grad])
                 if(step == 0):
                     accumulated_grad = grad
                 else:
@@ -148,7 +147,7 @@ class KerasModel(IModel):
                     preds = self.model(x_batch_train, training=True)
                     loss_value = getLoss(self.config)(y_batch_train, preds)
                 grad = tape.gradient(loss_value, self.model.trainable_variables)
-                grad = Gradient([g.numpy() for g in grad])
+                grad = HeterogeneousDenseArray([g.numpy() for g in grad])
                 if(step == 0):
                     accumulated_grad = grad
                 else:
