@@ -4,6 +4,8 @@ from tffmodel.types.MultiDimSparseArray import MultiDimSparseArray
 import numpy as np
 
 class HeterogeneousSparseArray(HeterogeneousArray):
+    is_sparse = True
+
     def __init__(self, data_arrays):
         if(any(map(lambda darr: not isinstance(darr, MultiDimSparseArray), data_arrays))):
             data_arrays = [MultiDimSparseArray(darr) for darr in data_arrays]
@@ -27,6 +29,8 @@ class HeterogeneousSparseArray(HeterogeneousArray):
         serialized_array = []
         for layer_array in self._data:
             target_dtype = layer_array.dtype
+            if(target_dtype == object):
+                raise RuntimeError("Dtype 'object' is not supported.")
             serialized_array.extend([np.int32(layer_array.coords).flatten().tobytes(),
                 layer_array.data.astype(target_dtype).tobytes(),
                 np.int32(layer_array.shape).tobytes(),

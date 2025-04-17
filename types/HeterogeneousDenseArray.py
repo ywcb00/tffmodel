@@ -5,11 +5,21 @@ import numpy as np
 import sparse
 
 class HeterogeneousDenseArray(HeterogeneousArray):
+    is_sparse = False
+
     def __init__(self, data_arrays):
         if(not isinstance(data_arrays, np.ndarray)):
             data_arrays = [da.todense() if isinstance(da, sparse.COO) else da
                 for da in data_arrays]
-        super().__init__(np.array(data_arrays, dtype=object))
+        # NOTE: defining the target dtype like this is a workaround for the problem of heterogeneous arrays
+        #   If the sub-arrays are heterogeneous, we can store them into an array of type object and
+        #       numpy keeps the individual types of the sub-arrays
+        #   If the sub-arrays have the same dimensions, numpy applys the type to all sub-arrays. Hence,
+        #       we cannot use the object type but have to use the type of the sub-arrays (assumed equal)
+        target_dtype = object # needed for storing arrays with different sizes in a numpy array
+        if(len(data_arrays) <= 1 or all([len(da) == len(data_arrays[0]) for da in data_arrays])):
+            target_dtype = data_arrays[0].dtype # use actual data type in case of homogeneous sub-arrays
+        super().__init__(np.array(data_arrays, dtype=target_dtype))
 
     @classmethod
     def getZero(self_class, shape_layer_arrays):
@@ -35,8 +45,10 @@ class HeterogeneousDenseArray(HeterogeneousArray):
     def serialize(self):
         # TODO: find a more efficient way to serialize the arrays
         serialized_array = []
+        target_dtype = self.getDType()
+        if(target_dtype == object):
+            raise RuntimeError("Dtype 'object' is not supported.")
         for layer_array in self._data:
-            target_dtype = layer_array.dtype
             serialized_array.extend([layer_array.astype(target_dtype).tobytes(),
                 np.int32(layer_array.shape).tobytes(), target_dtype.str.encode("UTF-8")])
         return serialized_array
