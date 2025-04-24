@@ -4,9 +4,18 @@ import numpy as np
 class HeterogeneousArray(ABC):
     def __init__(self, data):
         self._data = data
+        # stores the properties needed to decompress the data if compressed
+        self.compression_properties = None
 
     def getLength(self):
         return len(self._data)
+
+    def getCompressionProperties(self):
+        return self.compression_properties
+
+    @abstractmethod
+    def setCompressionProperties(self, compr_props):
+        pass
 
     @abstractclassmethod
     def getZero(self_class, shape_layer_arrays):
@@ -33,6 +42,10 @@ class HeterogeneousArray(ABC):
         assert all(dtp == dtypes[0] for dtp in dtypes), "Different dtypes are not supported yet"
         return dtypes[0]
 
+    @abstractmethod
+    def setDType(self, dtype):
+        pass
+
     def getDTypeName(self):
         return self.getDType().name
 
@@ -44,8 +57,8 @@ class HeterogeneousArray(ABC):
         self._data[layer_idx] = layer_array
 
     def __repr__(self):
-        return (f'{self.__class__.__name__}(#arrays={len(self.getLength())}, '
-            f'shape={self.getShapes()}, dtype={[arr.dtype for arr in self._data]})')
+        return (f'{self.__class__.__name__}(#arrays={self.getLength()}, '
+            f'shape={self.getShapes()}, dtype={self.getDType()})')
 
     @abstractmethod
     def serialize(self):
@@ -56,6 +69,16 @@ class HeterogeneousArray(ABC):
 
     @abstractmethod
     def sparsify(self, mask):
+        pass
+
+    @abstractmethod
+    def min(self):
+        pass
+    @abstractmethod
+    def max(self):
+        pass
+    @abstractmethod
+    def floor(self):
         pass
 
     @abstractclassmethod

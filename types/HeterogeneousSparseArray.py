@@ -51,9 +51,23 @@ class HeterogeneousSparseArray(HeterogeneousArray):
                 coords=layer_coords, data=layer_data, shape=layer_shape))
         return self_class(data_arrays)
 
+    def setCompressionProperties(self, compr_props):
+        raise NotImplementedError("Sparse arrays do not support decompression functionality yet.")
+
+    def setDType(self, dtype):
+        raise NotImplementedError("Sparse arrays do not support setting the data type yet.")
+
     def sparsify(self, mask):
         masked_data = [layer * m.reshape(layer.shape) for layer, m in zip(self._data, mask)]
         return self.__class__(masked_data)
+
+    def min(self):
+        return min(0, np.min([np.min(darr.data) for darr in self._data]))
+    def max(self):
+        return max(0, np.max([np.max(darr.data) for darr in self._data]))
+    def floor(self):
+        for darr_idx, darr in enumerate(self._data):
+            self.setLayer(darr_idx, np.floor(darr, dtype=self.getDType()))
 
     @classmethod
     def add_primitive(self_class, lhs, rhs):
