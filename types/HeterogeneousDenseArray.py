@@ -12,7 +12,9 @@ def convertLayerListToNumpyArray(layer_list):
     #   If the sub-arrays have the same dimensions, numpy applys the type to all sub-arrays. Hence,
     #       we cannot use the object type but have to use the type of the sub-arrays (assumed equal)
     target_dtype = object # needed for storing arrays with different sizes in a numpy array
-    if(len(layer_list) <= 1 or all([len(layer) == len(layer_list[0]) for layer in layer_list])):
+    if(not layer_list):
+        layer_list = []
+    elif(len(layer_list) == 1 or all([len(layer) == len(layer_list[0]) for layer in layer_list])):
         target_dtype = layer_list[0].dtype # use actual data type in case of homogeneous sub-arrays
     return np.array(layer_list, dtype=target_dtype)
 

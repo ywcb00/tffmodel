@@ -25,6 +25,9 @@ class HeterogeneousArray(ABC):
     def get(self):
         pass
 
+    def getNumLayers(self):
+        return len(self._data)
+
     def getShapes(self):
         shapes = [arr.shape for arr in self._data]
         return shapes
@@ -38,6 +41,8 @@ class HeterogeneousArray(ABC):
         return size
 
     def getDType(self):
+        if(self.getNumLayers() == 0):
+            return np.dtype("void")
         dtypes = [arr.dtype for arr in self._data]
         assert all(dtp == dtypes[0] for dtp in dtypes), "Different dtypes are not supported yet"
         return dtypes[0]
@@ -55,10 +60,6 @@ class HeterogeneousArray(ABC):
 
     def setLayer(self, layer_idx, layer_array):
         self._data[layer_idx] = layer_array
-
-    def __repr__(self):
-        return (f'{self.__class__.__name__}(#arrays={self.getLength()}, '
-            f'shape={self.getShapes()}, dtype={self.getDType()})')
 
     @abstractmethod
     def serialize(self):
@@ -80,6 +81,10 @@ class HeterogeneousArray(ABC):
     @abstractmethod
     def floor(self):
         pass
+
+    def __repr__(self):
+        return (f'{self.__class__.__name__}(#arrays={self.getLength()}, '
+            f'shape={self.getShapes()}, dtype={self.getDType()})')
 
     @abstractclassmethod
     def add_primitive(self_class, lhs, rhs):
