@@ -1,6 +1,6 @@
 from tffmodel.IModel import IModel
 from tffmodel.KerasModel import KerasModel
-from tffmodel.ModelBuilderUtils import getLoss, getMetrics, getFedCoreOptimizers, getOptimizer
+from tffmodel.ModelBuilderUtils import getLoss, getMetrics, getFedCoreOptimizers
 from tffmodel.ModelUtils import ModelUtils
 
 import attrs

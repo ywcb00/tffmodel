@@ -33,6 +33,9 @@ def getFedLearningRates(config):
 def getFedLearningRateSchedules(config):
     return getModelBuilder(config).getFedLearningRateSchedules()
 
+def getFedOptimizers(config):
+    return getFedApiOptimizers(config)
+
 def getFedApiOptimizers(config):
     return getModelBuilder(config).getFedApiOptimizers()
 
