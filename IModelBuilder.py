@@ -39,7 +39,7 @@ class IModelBuilder(ABC):
         pass
 
     def getFedLearningRates(self):
-        return self.server_learning_rate, self.client_learning_rate
+        return self.server_learning_rate, self.learning_rate
 
     @abstractmethod
     def getFedLearningRateSchedules(self):

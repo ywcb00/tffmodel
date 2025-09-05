@@ -6,9 +6,8 @@ import tensorflow_federated as tff
 class MnistModelBuilder(IModelBuilder):
     def __init__(self, config):
         super().__init__(config)
-        self.learning_rate = float(config.setdefault("lr", 0.001))
-        self.server_learning_rate = float(config.setdefault("lr_server", 1.))
-        self.client_learning_rate = float(config.setdefault("lr_client", 0.02))
+        self.learning_rate = float(config.setdefault("lr", 0.02))
+        self.server_learning_rate = float(config.setdefault("lr_global", 1.))
 
     def buildKerasModelLayers(self, keras_model):
         num_classes = 10
