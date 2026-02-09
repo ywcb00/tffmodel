@@ -1,5 +1,6 @@
 from tffdataset.DatasetUtils import DatasetID
 from tffmodel.FloodNetModelBuilder import FloodNetModelBuilder
+from tffmodel.IrisModelBuilder import IrisModelBuilder
 from tffmodel.MnistModelBuilder import MnistModelBuilder
 
 def getModelBuilder(config):
@@ -9,6 +10,8 @@ def getModelBuilder(config):
             return FloodNetModelBuilder(config)
         case DatasetID.Mnist:
             return MnistModelBuilder(config)
+        case DatasetID.Iris:
+            return IrisModelBuilder(config)
         case _:
             raise NotImplementedError
 
