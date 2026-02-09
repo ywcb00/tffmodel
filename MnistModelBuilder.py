@@ -1,7 +1,6 @@
 from tffmodel.IModelBuilder import IModelBuilder
 
 import tensorflow as tf
-import tensorflow_federated as tff
 
 class MnistModelBuilder(IModelBuilder):
     def __init__(self, config):
@@ -57,6 +56,7 @@ class MnistModelBuilder(IModelBuilder):
         return server_optimizer, client_optimizer
 
     def getFedCoreOptimizers(self):
+        import tensorflow_federated as tff
         # NOTE: only float learning rates in tff, no schedules
         server_lr, client_lr = self.getFedLearningRates()
         server_optimizer = tff.learning.optimizers.build_sgdm(learning_rate=server_lr)
