@@ -1,6 +1,6 @@
 from tffmodel.IModel import IModel
-from tffmodel.KerasModel import KerasModel
 from tffmodel.ModelBuilderUtils import getLoss, getMetrics, getFedApiOptimizers
+from tffmodel.ModelUtils import ModelUtils
 from tffmodel.ModelUtils import ModelUtils
 
 import logging
@@ -15,7 +15,7 @@ class FedApiModel(IModel):
 
     @classmethod
     def createFedModel(self_class, fed_data, config):
-        keras_model = KerasModel.createKerasModel(fed_data[0], config)
+        keras_model = ModelUtils.getModelClass(self.config).createKerasModel(fed_data[0], config)
         fed_model = tff.learning.models.from_keras_model(
             keras_model = keras_model,
             input_spec = fed_data[0].element_spec,
@@ -66,12 +66,12 @@ class FedApiModel(IModel):
 
     def predict(self, data):
         keras_model = self.getTrainedKerasModel(data, self.state, self.config)
-        predictions = KerasModel.predictKerasModel(keras_model, data)
+        predictions = ModelUtils.getModelClass(self.config).predictKerasModel(keras_model, data)
         return predictions
 
     @classmethod
     def getTrainedKerasModel(self_class, data, state, config):
-        keras_model = KerasModel.createKerasModel(data, config)
+        keras_model = ModelUtils.getModelClass(self.config).createKerasModel(data, config)
         keras_model.compile(loss = getLoss(config),
             metrics = getMetrics(config))
         model_weights = state[0].get_model_weights(state[1].state)
@@ -94,5 +94,5 @@ class FedApiModel(IModel):
 
     def evaluateCentralized(self, data):
         keras_model = self.getTrainedKerasModel(data, self.state, self.config)
-        evaluation_metrics = KerasModel.evaluateKerasModel(keras_model, data)
+        evaluation_metrics = ModelUtils.getModelClass(self.config).evaluateKerasModel(keras_model, data)
         return evaluation_metrics

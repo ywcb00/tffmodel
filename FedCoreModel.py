@@ -1,6 +1,6 @@
 from tffmodel.IModel import IModel
-from tffmodel.KerasModel import KerasModel
 from tffmodel.ModelBuilderUtils import getLoss, getMetrics, getFedCoreOptimizers
+from tffmodel.ModelUtils import ModelUtils
 from tffmodel.ModelUtils import ModelUtils
 
 import attrs
@@ -17,7 +17,7 @@ class FedCoreModel(IModel):
 
     @classmethod
     def createFedModel(self_class, fed_data, config):
-        keras_model = KerasModel.createKerasModel(fed_data[0], config)
+        keras_model = ModelUtils.getModelClass(self.config).createKerasModel(fed_data[0], config)
         fed_model = tff.learning.models.from_keras_model(
             keras_model = keras_model,
             input_spec = fed_data[0].element_spec,
@@ -29,7 +29,7 @@ class FedCoreModel(IModel):
         self.logger.info(f'Fitting federated model with {self.config["num_workers"]} workers')
 
         def cfm():
-            keras_model = KerasModel.createKerasModel(fed_dataset.train[0], self.config)
+            keras_model = ModelUtils.getModelClass(self.config).createKerasModel(fed_dataset.train[0], self.config)
             fed_model = tff.learning.models.from_keras_model(
                 keras_model,
                 input_spec = fed_dataset.train[0].element_spec,
@@ -143,7 +143,7 @@ class FedCoreModel(IModel):
 
     @classmethod
     def getTrainedKerasModel(self_class, data, state, config):
-        keras_model = KerasModel.createKerasModel(data, config)
+        keras_model = ModelUtils.getModelClass(self.config).createKerasModel(data, config)
         keras_model.compile(loss = getLoss(config),
             metrics = getMetrics(config))
         # assign our weights to the keras model
@@ -154,7 +154,7 @@ class FedCoreModel(IModel):
 
     def predict(self, data):
         keras_model = self.getTrainedKerasModel(data, self.state, self.config)
-        predictions = KerasModel.predictKerasModel(keras_model, data)
+        predictions = ModelUtils.getModelClass(self.config).predictKerasModel(keras_model, data)
         return predictions
 
     def evaluate(self, data):
@@ -166,7 +166,7 @@ class FedCoreModel(IModel):
         server_optimizer, client_optimizer = getFedCoreOptimizers(self.config)
 
         def cfm():
-            keras_model = KerasModel.createKerasModel(fed_data[0], self.config)
+            keras_model = ModelUtils.getModelClass(self.config).createKerasModel(fed_data[0], self.config)
             fed_model = tff.learning.models.from_keras_model(
                 keras_model,
                 input_spec = fed_data[0].element_spec,
@@ -258,5 +258,5 @@ class FedCoreModel(IModel):
 
     def evaluateCentralized(self, data):
         keras_model = self.getTrainedKerasModel(data, self.state, self.config)
-        evaluation_metrics = KerasModel.evaluateKerasModel(keras_model, data)
+        evaluation_metrics = ModelUtils.getModelClass(self.config).evaluateKerasModel(keras_model, data)
         return evaluation_metrics
