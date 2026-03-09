@@ -17,10 +17,10 @@ class KerasModel(IModel):
         return self_class.createKerasModelElementSpec(data.element_spec, config)
 
     @classmethod
-    def createKerasModelElementSpec(self_class, data_element_spec, config):
+    def createModelElementSpec(self_class, data_element_spec, config):
         model_builder = getModelBuilder(config)
-        keras_model = model_builder.buildModelElementSpec(data_element_spec)
-        return keras_model
+        model = model_builder.buildModelElementSpec(data_element_spec)
+        return model
 
     @classmethod
     def fromExistingModel(self_class, model, optimizer, config):
@@ -158,8 +158,8 @@ class KerasModel(IModel):
         return self.predictKerasModel(self.model, data)
 
     @classmethod
-    def predictKerasModel(self_class, keras_model, data):
-        predictions = keras_model.predict(data)
+    def predictKerasModel(self_class, model, data):
+        predictions = model.predict(data)
         return predictions
 
     def evaluate(self, data):
@@ -168,7 +168,7 @@ class KerasModel(IModel):
         return evaluation_metrics
 
     @classmethod
-    def evaluateKerasModel(self_class, keras_model, data):
-        evaluation_scalars = keras_model.evaluate(data, verbose=2)
-        evaluation_metrics = dict(zip(keras_model.metrics_names, evaluation_scalars))
+    def evaluateKerasModel(self_class, model, data):
+        evaluation_scalars = model.evaluate(data, verbose=2)
+        evaluation_metrics = dict(zip(model.metrics_names, evaluation_scalars))
         return evaluation_metrics

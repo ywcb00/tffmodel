@@ -1,22 +1,22 @@
-from tffmodel.IModelBuilder import IModelBuilder
+from tffmodel.IKerasModelBuilder import IKerasModelBuilder
 
 import tensorflow as tf
 
-class IrisModelBuilder(IModelBuilder):
+class IrisModelBuilder(IKerasModelBuilder):
     def __init__(self, config):
         super().__init__(config)
         self.learning_rate = float(config.setdefault("lr", 0.1))
         self.server_learning_rate = float(config.setdefault("lr_global", 1.))
 
-    def buildKerasModelLayers(self, keras_model):
+    def buildKerasModelLayers(self, model):
         # Adopted from https://machinelearningmastery.com/multi-class-classification-tutorial-keras-deep-learning-library/
         num_classes = 3
 
         # NOTE: set the initializers in order to ensure reproducibility
-        keras_model.add(tf.keras.layers.Dense(8, activation='relu',
+        model.add(tf.keras.layers.Dense(8, activation='relu',
             kernel_initializer=tf.keras.initializers.GlorotUniform(seed=self.config["seed"]),
             bias_initializer=tf.keras.initializers.Zeros()))
-        keras_model.add(tf.keras.layers.Dense(3, activation='softmax',
+        model.add(tf.keras.layers.Dense(3, activation='softmax',
             kernel_initializer=tf.keras.initializers.GlorotUniform(seed=self.config["seed"]),
             bias_initializer=tf.keras.initializers.Zeros()))
 

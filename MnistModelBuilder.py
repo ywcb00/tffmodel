@@ -1,28 +1,28 @@
-from tffmodel.IModelBuilder import IModelBuilder
+from tffmodel.IKerasModelBuilder import IKerasModelBuilder
 
 import tensorflow as tf
 
-class MnistModelBuilder(IModelBuilder):
+class MnistModelBuilder(IKerasModelBuilder):
     def __init__(self, config):
         super().__init__(config)
         self.learning_rate = float(config.setdefault("lr", 0.02))
         self.server_learning_rate = float(config.setdefault("lr_global", 1.))
 
-    def buildKerasModelLayers(self, keras_model):
+    def buildKerasModelLayers(self, model):
         num_classes = 10
 
         # NOTE: set the initializers in order to ensure reproducibility
-        keras_model.add(tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation="relu",
+        model.add(tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation="relu",
             kernel_initializer=tf.keras.initializers.GlorotUniform(seed=self.config["seed"]),
             bias_initializer=tf.keras.initializers.Zeros()))
-        keras_model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2)))
-        keras_model.add(tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation="relu",
+        model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2)))
+        model.add(tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation="relu",
             kernel_initializer=tf.keras.initializers.GlorotUniform(seed=self.config["seed"]),
             bias_initializer=tf.keras.initializers.Zeros()))
-        keras_model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2)))
-        keras_model.add(tf.keras.layers.Flatten())
-        keras_model.add(tf.keras.layers.Dropout(0.5, seed=self.config["seed"]))
-        keras_model.add(tf.keras.layers.Dense(num_classes, activation="softmax",
+        model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2)))
+        model.add(tf.keras.layers.Flatten())
+        model.add(tf.keras.layers.Dropout(0.5, seed=self.config["seed"]))
+        model.add(tf.keras.layers.Dense(num_classes, activation="softmax",
             kernel_initializer=tf.keras.initializers.GlorotUniform(seed=self.config["seed"]),
             bias_initializer=tf.keras.initializers.Zeros()))
 
