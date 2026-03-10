@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import tensorflow as tf
 
 from tffmodel.IModelBuilder import IModelBuilder

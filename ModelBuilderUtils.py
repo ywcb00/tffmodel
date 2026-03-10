@@ -1,16 +1,16 @@
 from tffdataset.DatasetUtils import DatasetID
-from tffmodel.FloodNetModelBuilder import FloodNetModelBuilder
-from tffmodel.IrisModelBuilder import IrisModelBuilder
-from tffmodel.MnistModelBuilder import MnistModelBuilder
 
 def getModelBuilder(config):
     # TODO: this implementation creates a model builder object for every call
     match config["dataset_id"]:
         case DatasetID.FloodNet:
+            from tffmodel.FloodNetModelBuilder import FloodNetModelBuilder
             return FloodNetModelBuilder(config)
         case DatasetID.Mnist:
+            from tffmodel.MnistModelBuilder import MnistModelBuilder
             return MnistModelBuilder(config)
         case DatasetID.Iris:
+            from tffmodel.IrisModelBuilder import IrisModelBuilder
             return IrisModelBuilder(config)
         case _:
             raise NotImplementedError

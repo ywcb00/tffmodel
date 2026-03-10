@@ -6,12 +6,12 @@ class IModel(ABC):
 
     @classmethod
     @abstractmethod
-    def fromExistingModel(self_class, model, optimizer, config):
+    def createModelElementSpec(self_class, data_element_spec, config):
         pass
 
     @classmethod
     @abstractmethod
-    def createModelElementSpec(self_class, data_element_spec, config):
+    def fromExistingModel(self_class, model, optimizer, config):
         pass
 
     @abstractmethod
