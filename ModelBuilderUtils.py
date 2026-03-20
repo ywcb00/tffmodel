@@ -12,6 +12,9 @@ def getModelBuilder(config):
         case DatasetID.Iris:
             from tffmodel.IrisModelBuilder import IrisModelBuilder
             return IrisModelBuilder(config)
+        case DatasetID.IrisPyTorch:
+            from tffmodel.IrisPyTorchModelBuilder import IrisPyTorchModelBuilder
+            return IrisPyTorchModelBuilder(config)
         case _:
             raise NotImplementedError
 

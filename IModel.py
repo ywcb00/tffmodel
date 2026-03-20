@@ -15,6 +15,19 @@ class IModel(ABC):
         pass
 
     @abstractmethod
+    def initModelElementSpec(self, data_element_spec):
+        pass
+
+    @abstractmethod
+    def serialize(self):
+        pass
+
+    @classmethod
+    @abstractmethod
+    def deserializeModel(self_class, serialized_model_config, serialized_optimizer_config):
+        pass
+
+    @abstractmethod
     def clone(self):
         pass
 

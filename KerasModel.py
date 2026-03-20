@@ -4,6 +4,7 @@ from tffmodel.types.HeterogeneousDenseArray import HeterogeneousDenseArray
 
 import logging
 import numpy as np
+import pickle
 import tensorflow as tf
 
 class KerasModel(IModel):
@@ -13,8 +14,8 @@ class KerasModel(IModel):
         self.logger.setLevel(config["log_level"])
 
     @classmethod
-    def createKerasModel(self_class, data, config):
-        return self_class.createKerasModelElementSpec(data.element_spec, config)
+    def createModel(self_class, data, config):
+        return self_class.createModelElementSpec(data.element_spec, config)
 
     @classmethod
     def createModelElementSpec(self_class, data_element_spec, config):
@@ -28,6 +29,23 @@ class KerasModel(IModel):
         keras_model.model = model
         keras_model.initOptimizer(optimizer)
         return keras_model
+
+    # serialize the model architecture and the optimizer configuration of a keras model
+    def serialize(self):
+        model_config = self.model.get_config()
+        serialized_model_config = pickle.dumps(model_config, protocol=4)
+        optimizer_config = tf.keras.optimizers.serialize(self.model.optimizer)
+        serialized_optimizer_config = pickle.dumps(optimizer_config, protocol=4)
+        return serialized_model_config, serialized_optimizer_config
+
+    # deserialize the model architecture and the optimizer configuration of a keras model
+    @classmethod
+    def deserializeModel(self_class, serialized_model_config, serialized_optimizer_config):
+        model_config = pickle.loads(serialized_model_config)
+        model = tf.keras.Sequential.from_config(model_config)
+        optimizer_config = pickle.loads(serialized_optimizer_config)
+        optimizer = tf.keras.optimizers.deserialize(optimizer_config)
+        return model, optimizer
 
     def clone(self):
         restore_weights = self.getWeights()
@@ -55,8 +73,12 @@ class KerasModel(IModel):
             optimizer=getOptimizer(self.config))
 
     def initModelWithOptimizer(self, data, optimizer):
-        self.model = self.createKerasModel(data, self.config)
+        self.model = self.createModel(data, self.config)
         self.initOptimizer(optimizer)
+
+    def initModelElementSpec(self, data_element_spec):
+        self.model = self.createModelElementSpec(data_element_spec, self.config)
+        self.initOptimizer(getOptimizer(self.config))
 
     def initOptimizer(self, optimizer):
         self.model.compile(optimizer=optimizer,
@@ -102,7 +124,7 @@ class KerasModel(IModel):
             verbose=2,
             callbacks=None if not self.config.setdefault('log_tensorboard_flag', True) else [self.logging_callback])
 
-        return fit_history
+        return fit_history.history
 
     def fitGradient(self, dataset):
         self.logger.info(f'Fitting model for {self.config["num_local_epochs"]} local epochs ' +
