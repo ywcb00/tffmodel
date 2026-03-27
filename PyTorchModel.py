@@ -59,7 +59,7 @@ class PyTorchModel(IModel):
     def clone(self):
         # deepcopy also copies the weights
         cloned_model = copy.deepcopy(self.model)
-        cloned_optimizer = type(self.optimizer)(cloned_model.parameters(), lr=getLearningRate(self.config))
+        cloned_optimizer = type(self.optimizer)
         cloned_pytorch_model = self.fromExistingModel(cloned_model, cloned_optimizer, self.config)
         return cloned_pytorch_model
 
